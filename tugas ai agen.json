@@ -1,0 +1,162 @@
+{
+  "name": "tugas ai agen",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5cffa102-d334-4862-b283-d1e7ff924113",
+      "name": "Telegram Trigger",
+      "webhookId": "tele-ai-agent",
+      "credentials": {
+        "telegramApi": {
+          "id": "K8hKec2p1Y7Zrtt0",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "Anda adalah asisten virtual yang bertugas membantu pengguna menjawab berbagai pertanyaan dengan jelas, ramah, dan informatif.\n\nBerikan jawaban yang mudah dipahami dan langsung pada inti pertanyaan. Jika pertanyaan berkaitan dengan teknologi, pemrograman, atau penggunaan aplikasi digital, berikan penjelasan yang sederhana namun tetap akurat.\n\nGunakan bahasa yang sopan dan profesional dalam setiap jawaban. Jika informasi yang diminta tidak tersedia atau tidak diketahui, jelaskan dengan jujur bahwa informasi tersebut tidak dapat ditemukan dan sarankan pengguna untuk mencari sumber resmi.\n\nTujuan utama Anda adalah membantu pengguna mendapatkan informasi dengan cepat, jelas, dan bermanfaat."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        288,
+        0
+      ],
+      "id": "98180cef-6ab6-4b6c-a625-fd994e4f271a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        160,
+        208
+      ],
+      "id": "91289d10-2631-4d31-a9c4-593b1b7b699f",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "BQFHe5golaYobRTk",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $node[\"Telegram Trigger\"].json[\"message\"][\"chat\"][\"id\"] }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "a9b44df8-d484-4271-b9e7-eb134156ec02",
+      "name": "Telegram Send",
+      "webhookId": "e84ba7cd-da31-49be-ad72-bcda14953cd2",
+      "credentials": {
+        "telegramApi": {
+          "id": "K8hKec2p1Y7Zrtt0",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        384,
+        224
+      ],
+      "id": "14a3bb9f-1aff-45b9-80c8-4942be1e274b",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "86c4f782-f22c-4cec-9e8a-c01f53502180",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "52b60b145238cd1a6c409cc4997107536072d56a857dcdbe087a6380d274abbd"
+  },
+  "id": "jamLq6FhjISRpZog",
+  "tags": []
+}
